@@ -32,8 +32,32 @@
     <h3>Movie List</h3>
     <div v-for="movie in movies" v-bind:key="movie.id">
       <p>{{ movie.title }}</p>
+      <button v-on:click="showMovie(movie)">More info</button>
       <hr />
     </div>
+    <dialog id="movie-details">
+      <form method="dialog">
+        <p>
+          Title:
+          <input type="text" v-model="currentMovie.title" />
+        </p>
+        <p>
+          Director:
+          <input type="text" v-model="currentMovie.director" />
+        </p>
+        <p>
+          Plot:
+          <input type="text" v-model="currentMovie.plot" />
+        </p>
+        <p>
+          Year:
+          <input type="text" v-model="currentMovie.year" />
+        </p>
+        <button v-on:click="updateMovie(currentMovie)">Update</button>
+        <button>Close</button>
+        <button v-on:click="destroyMovie(currentMovie)">Destroy</button>
+      </form>
+    </dialog>
   </div>
 </template>
 <style></style>
@@ -51,6 +75,7 @@ export default {
       newMoviePlot: "",
       newMovieStarring: "",
       newMovieYear: "",
+      currentMovie: {},
     };
   },
   created: function () {
@@ -84,6 +109,32 @@ export default {
         this.newMoviePlot = "";
         this.newMovieStarring = "";
         this.newMovieYear = "";
+      });
+    },
+
+    showMovie: function (theMovie) {
+      console.log(theMovie);
+      this.currentMovie = theMovie;
+      document.querySelector("#movie-details").showModal();
+    },
+    updateMovie: function (theMovie) {
+      console.log(theMovie);
+      var params = {
+        title: theMovie.title,
+        plot: theMovie.plot,
+        director: theMovie.director,
+        year: theMovie.year,
+      };
+      axios.patch("/api/movies/" + theMovie.id, params).then((response) => {
+        console.log(response.data);
+      });
+    },
+    destroyMovie: function (theMovie) {
+      console.log(theMovie);
+      axios.delete("/api/movies/" + theMovie.id).then((response) => {
+        console.log(response.data);
+        var index = this.movies.indexOf(theMovie);
+        this.movies.splice(index, 1);
       });
     },
     submit: function () {
